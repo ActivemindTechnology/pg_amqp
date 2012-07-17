@@ -290,12 +290,18 @@ pg_amqp_publish_opt(PG_FUNCTION_ARGS, int channel) {
       amqp_bytes_t exchange_b = amqp_cstring_bytes("amq.direct");
       amqp_bytes_t routing_key_b = amqp_cstring_bytes("");
       amqp_bytes_t body_b = amqp_cstring_bytes("");
+      amqp_basic_properties_t properties;
 
       set_bytes_from_text(exchange_b,1);
       set_bytes_from_text(routing_key_b,2);
       set_bytes_from_text(body_b,3);
+      properties._flags = AMQP_BASIC_CONTENT_TYPE_FLAG | AMQP_BASIC_DELIVERY_MODE_FLAG;
+      properties.content_type = amqp_cstring_bytes("");
+      set_bytes_from_text(properties.content_type,4);
+      properties.delivery_mode = PG_GETARG_BOOL(5) == 0 ? 1 : 2;
+
       rv = amqp_basic_publish(bs->conn, channel, exchange_b, routing_key_b,
-                              mandatory, immediate, NULL, body_b);
+                              mandatory, immediate, &properties, body_b);
       reply = amqp_get_rpc_reply();
       if(rv || reply->reply_type != AMQP_RESPONSE_NORMAL) {
         if(once_more && (channel == 1 || bs->uncommitted == 0)) {
