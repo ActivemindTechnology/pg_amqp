@@ -64,7 +64,7 @@ Insert AMQP broker information (host/port/user/pass) into the
 
 A process starts and connects to PostgreSQL and runs:
 
-    SELECT amqp.publish(broker_id, 'amqp.direct', 'foo', 'message');
+    SELECT amqp.publish(broker_id, 'amqp.direct', 'foo', 'message', 'plain/text', TRUE);
 
 Upon process termination, all broker connections will be torn down.
 If there is a need to disconnect from a specific broker, one can call:
